@@ -522,7 +522,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	/* USER CODE BEGIN Callback 1 */
 	if (htim->Instance == TIM3 && osKernelRunning ()) {
 		uint32_t can_tx = TimeSyncTimeSpan();
-		FillTxMsg(&hcan2, (uint8_t*)&can_tx, 4);
+		FillTxMsg(&hcan3, (uint8_t*)&can_tx, 4);
 		HAL_GPIO_WritePin(TIMESYNC_OUT_PORT, TIMESYNC_OUT_PIN, GPIO_PIN_RESET);
 		HAL_Delay(10);
 		HAL_GPIO_WritePin(TIMESYNC_OUT_PORT, TIMESYNC_OUT_PIN, GPIO_PIN_SET);
