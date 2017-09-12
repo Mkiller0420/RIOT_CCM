@@ -17,4 +17,9 @@
 void osCan1CreateTask( osPriority priority );
 void osCan2CreateTask( osPriority priority );
 void osCan3CreateTask( osPriority priority );
+
+osMessageQId can1_queue_handle;
+osMessageQId can2_queue_handle;
+osMessageQId can3_queue_handle;
+
 #endif /* CAN_LOGIC_H_ */

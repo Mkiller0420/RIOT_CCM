@@ -6,6 +6,7 @@
  */
 #include "can_logic.h"
 #include "..\base\can_hw.h"
+#include "state.h"
 HAL_StatusTypeDef Can1StaFlt = HAL_ERROR;
 HAL_StatusTypeDef Can2StaFlt = HAL_ERROR;
 HAL_StatusTypeDef Can3StaFlt = HAL_ERROR;
@@ -20,18 +21,19 @@ CAN_FilterConfTypeDef Can2Filter;
 CAN_FilterConfTypeDef Can3Filter;
 ///Can1
 static osThreadId can1_start_handle;
-static osMessageQDef(can1_queue, 16, uint8_t);
-static osMessageQId can1_queue_handle;
 
 ///CAN2
 static osThreadId can2_start_handle;
-static osMessageQDef(can2_queue, 16, uint8_t);
-static osMessageQId can2_queue_handle;
 
 ///CAN3
 static osThreadId can3_start_handle;
-static osMessageQDef(can3_queue, 16, uint8_t);
-static osMessageQId can3_queue_handle;
+
+static osMessageQDef(can1_queue, 16, uint32_t);
+
+static osMessageQDef(can2_queue, 16, uint32_t);
+
+static osMessageQDef(can3_queue, 16, uint32_t);
+
 
 //Can1
 static void prvCan1Task( void const * argument )
@@ -46,7 +48,8 @@ static void prvCan1Task( void const * argument )
 	{
 		//uint32_t can_tx = 0xABCDEF54;
 		//FillTxMsg(&hcan1, (uint8_t*)&can_tx, 4);
-		osDelay(1);
+		osEvent evt = osMessageGet(can1_queue_handle, osWaitForever);
+		//osDelay(1);
 	}
 }
 void osCan1CreateTask( osPriority priority )
@@ -66,8 +69,8 @@ static void prvCan2Task( void const * argument )
 	HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0);
 	for(;;)
 	{
+		osEvent evt = osMessageGet(can2_queue_handle, osWaitForever);
 
-		osDelay(1);
 	}
 
 }
@@ -89,9 +92,17 @@ static void prvCan3Task( void const * argument )
 	HAL_CAN_Receive_IT(&hcan3, CAN_FIFO0);
 	for(;;)
 	{
-		osDelay(1);
+		osEvent evt = osMessageGet(can3_queue_handle, osWaitForever);
+		if (evt.status == osEventMessage) {
+			if (vStateGet()==sWaitforCan3){
+				if (hcan3.pRxMsg->Data[0]==0x11){
+					vStateSet(sWaitforPC);
+				}
+			}
+		}
 	}
 }
+
 void osCan3CreateTask( osPriority priority )
 {
 	osThreadDef(Can3Task, prvCan3Task, priority, 0, configMINIMAL_STACK_SIZE);

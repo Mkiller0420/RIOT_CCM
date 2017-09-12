@@ -8,6 +8,7 @@
 #include "main.h"
 
 #include "can_hw.h"
+#include "..\module\can_logic.h"
 #include <string.h>
 /*************** CAN ***************/
 
@@ -92,22 +93,22 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 {
 	//CanxStaTx = HAL_CAN_Transmit(hcan, 10);
 
-	switch((uint32_t)(hcan->Instance))
-	{
-	case ((uint32_t)CAN1):
-					Can1RxCntr++;
+	switch((uint32_t)(hcan->Instance))	{
+	case (uint32_t)CAN1:
+			Can1RxCntr++;
 	FillTxMsg(hcan, (uint8_t*)&Can1RxCntr,4);
 	Can1TxCntr++;
 	break;
-	case ((uint32_t)CAN2):
-					Can2RxCntr++;
+	case (uint32_t)CAN2:
+			Can2RxCntr++;
 	FillTxMsg(hcan, (uint8_t*)&Can2RxCntr,4);
 	Can2TxCntr++;
 	break;
-	case ((uint32_t)CAN3):
+	case (uint32_t)CAN3:
 			Can3RxCntr++;
-	FillTxMsg(hcan, (uint8_t*)&Can3RxCntr,4);
-	Can3TxCntr++;
+	//FillTxMsg(hcan, (uint8_t*)&Can3RxCntr,4);
+	//Can3TxCntr++;
+	osMessagePut(can3_queue_handle, Can3RxCntr, 0);
 	break;
 	default:
 		break;

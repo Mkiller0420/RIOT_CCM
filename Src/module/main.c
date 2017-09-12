@@ -56,6 +56,7 @@
 #include "..\base\can_hw.h"
 #include "..\base\timesync.h"
 #include "..\base\daisychain.h"
+#include "state.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -118,24 +119,29 @@ int main(void)
 
 	/* USER CODE BEGIN SysInit */
 	MonitorInit();
+	osMonitorCreateTask(osPriorityNormal);
+	vMonitorSetLED(eAll, eOff);
+	osStateCreateTask(osPriorityHigh);
+	vStateSet(sWaitforCan3);
+	//osCan1CreateTask(osPriorityNormal);
+	//osCan2CreateTask(osPriorityNormal);
+
 	/* USER CODE END SysInit */
 
 	/* Initialize all configured peripherals */
 	//MX_GPIO_Init();
 	MX_DMA_Init();
+
 	MX_TIM3_Init();
 	MX_ADC1_Init();
+
 	MX_TIM6_Init();
 	MX_TIM7_Init();
 
 	/* USER CODE BEGIN 2 */
 
-	HAL_TIM_Base_Start_IT(&htim3);
-	osMonitorCreateTask(osPriorityNormal);
-	vMonitorSetLED(eAll, eBlink);
-	osCan1CreateTask(osPriorityNormal);
-	osCan2CreateTask(osPriorityNormal);
-	osCan3CreateTask(osPriorityNormal);
+	//HAL_TIM_Base_Start_IT(&htim3);
+
 	TimeSyncInit();
 
 	//TimeSyncTest();
@@ -520,13 +526,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		HAL_IncTick();
 	}
 	/* USER CODE BEGIN Callback 1 */
-	if (htim->Instance == TIM3 && osKernelRunning ()) {
+	/*if (htim->Instance == TIM3 && osKernelRunning ()) {
 		uint32_t can_tx = TimeSyncTimeSpan();
 		FillTxMsg(&hcan3, (uint8_t*)&can_tx, 4);
 		HAL_GPIO_WritePin(TIMESYNC_OUT_PORT, TIMESYNC_OUT_PIN, GPIO_PIN_RESET);
 		HAL_Delay(10);
 		HAL_GPIO_WritePin(TIMESYNC_OUT_PORT, TIMESYNC_OUT_PIN, GPIO_PIN_SET);
-	}
+	}*/
 	/* USER CODE END Callback 1 */
 }
 
