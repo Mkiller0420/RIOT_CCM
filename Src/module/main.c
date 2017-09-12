@@ -51,10 +51,11 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */
-#include "sysmon.h"
+#include "..\base\sysmon.h"
 #include "can_logic.h"
-#include "can_hw.h"
-#include "timesync.h"
+#include "..\base\can_hw.h"
+#include "..\base\timesync.h"
+#include "..\base\daisychain.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -123,7 +124,6 @@ int main(void)
 	//MX_GPIO_Init();
 	MX_DMA_Init();
 	MX_TIM3_Init();
-
 	MX_ADC1_Init();
 	MX_TIM6_Init();
 	MX_TIM7_Init();
@@ -137,6 +137,7 @@ int main(void)
 	osCan2CreateTask(osPriorityNormal);
 	osCan3CreateTask(osPriorityNormal);
 	TimeSyncInit();
+
 	//TimeSyncTest();
 	//while(!TimeSyncTest());
 	/* USER CODE END 2 */
@@ -521,7 +522,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	/* USER CODE BEGIN Callback 1 */
 	if (htim->Instance == TIM3 && osKernelRunning ()) {
 		uint32_t can_tx = TimeSyncTimeSpan();
-		FillTxMsg(&hcan1, (uint8_t*)&can_tx, 4);
+		FillTxMsg(&hcan2, (uint8_t*)&can_tx, 4);
 		HAL_GPIO_WritePin(TIMESYNC_OUT_PORT, TIMESYNC_OUT_PIN, GPIO_PIN_RESET);
 		HAL_Delay(10);
 		HAL_GPIO_WritePin(TIMESYNC_OUT_PORT, TIMESYNC_OUT_PIN, GPIO_PIN_SET);

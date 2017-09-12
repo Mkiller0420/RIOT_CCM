@@ -12,7 +12,7 @@ extern TIM_HandleTypeDef htim6;
 
 /// ADC sample
 uint16_t ADC_RAW[LED_ADC_NUM] = {0};
-static LED_STATE led_input[LED_NUM];
+
 /*************** TIMER ***************/
 
 void HwStartPeriodicTimer(void)

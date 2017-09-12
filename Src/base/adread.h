@@ -17,11 +17,8 @@
 #define GRN_LINE			500
 #define BLU_LINE			100
 /*************** ADC ***************/
-typedef enum{
-	RED=0,
-	GRN,
-	BLU
-}Color_CHANNEL;
+
+
 
 typedef struct{
 	uint16_t 	led_color[100][3];
@@ -29,6 +26,7 @@ typedef struct{
 	uint8_t 	pin;
 }LED_STATE;
 
+static LED_STATE led_input[LED_NUM];
 
 HAL_StatusTypeDef AdcSample(void);
 

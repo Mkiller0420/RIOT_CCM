@@ -9,7 +9,7 @@
 //#define TIME_SYNC_TESTING
 #include <stdbool.h>
 #include <stdint.h>
-#include "sysmon.h"
+#include "..\base\sysmon.h"
 //#include "config.h"
 
 // Exported constants ----------------------------------------------------------

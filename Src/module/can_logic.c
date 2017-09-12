@@ -5,7 +5,7 @@
  *      Author: MJC
  */
 #include "can_logic.h"
-#include "can_hw.h"
+#include "..\base\can_hw.h"
 HAL_StatusTypeDef Can1StaFlt = HAL_ERROR;
 HAL_StatusTypeDef Can2StaFlt = HAL_ERROR;
 HAL_StatusTypeDef Can3StaFlt = HAL_ERROR;

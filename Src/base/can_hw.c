@@ -95,12 +95,12 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 	switch((uint32_t)(hcan->Instance))
 	{
 	case ((uint32_t)CAN1):
-			Can1RxCntr++;
+					Can1RxCntr++;
 	FillTxMsg(hcan, (uint8_t*)&Can1RxCntr,4);
 	Can1TxCntr++;
 	break;
 	case ((uint32_t)CAN2):
-			Can2RxCntr++;
+					Can2RxCntr++;
 	FillTxMsg(hcan, (uint8_t*)&Can2RxCntr,4);
 	Can2TxCntr++;
 	break;
@@ -171,11 +171,11 @@ void MX_CAN3_Init(void)
 	hcan3.Instance = CAN3;
 	hcan3.pTxMsg = &Can3TxMsg;
 	hcan3.pRxMsg = &Can3RxMsg;
-	hcan3.Init.Prescaler = 10;
+	hcan3.Init.Prescaler = 20;
 	hcan3.Init.Mode = CAN_MODE_NORMAL;
 	hcan3.Init.SJW = CAN_SJW_1TQ;
-	hcan3.Init.BS1 = CAN_BS1_7TQ;
-	hcan3.Init.BS2 = CAN_BS2_2TQ;
+	hcan3.Init.BS1 = CAN_BS1_16TQ;
+	hcan3.Init.BS2 = CAN_BS2_3TQ;
 	hcan3.Init.TTCM = DISABLE;
 	hcan3.Init.ABOM = DISABLE;
 	hcan3.Init.AWUM = DISABLE;
