@@ -34,8 +34,6 @@ static osMessageQDef(can2_queue, 16, uint32_t);
 
 static osMessageQDef(can3_queue, 16, uint32_t);
 
-
-
 #define CAN3_ID				0x33333333
 #define	CAN3_CONFIG_HEAD1	0x11
 #define CAN3_CONFIG_HEAD2	0x22
@@ -55,9 +53,6 @@ static void prvCan1Task( void const * argument )
 		//FillTxMsg(&hcan1, (uint8_t*)&can_tx, 4);
 		osEvent evt = osMessageGet(can1_queue_handle, osWaitForever);
 		if (evt.status == osEventMessage) {
-			if (vStateGet()->systate_curr == sWaitforPC){
-				if (hcan1.pRxMsg->ExtId){
-			}
 
 		}
 		//osDelay(1);
@@ -124,3 +119,4 @@ void osCan3CreateTask( osPriority priority )
 	can3_start_handle = osThreadCreate(osThread(Can3Task), NULL);
 	can3_queue_handle = osMessageCreate(osMessageQ(can3_queue), NULL);
 }
+
