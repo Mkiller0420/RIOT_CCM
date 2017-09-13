@@ -21,6 +21,7 @@
 #define LED_Ready_Port 		GPIOD
 #define LED_Rsvd_Port 		GPIOD
 
+#define MONI_PROI	osPriorityIdle
 
 typedef enum
 {

@@ -13,9 +13,12 @@
 //// CAN test
 //void FillTxMsg(CAN_HandleTypeDef* hcan, uint32_t RxCntr, uint32_t TxCntr);
 /// CAN
+#define CAN1_PROI	osPriorityAboveNormal
+#define CAN2_PROI	osPriorityNormal
+#define CAN3_PROI	osPriorityBelowNormal
 
-void osCan1CreateTask( osPriority priority );
-void osCan2CreateTask( osPriority priority );
+void osCan1CreateTask( osPriority priority , uint32_t can_id);
+void osCan2CreateTask( osPriority priority , uint32_t can_id);
 void osCan3CreateTask( osPriority priority );
 
 osMessageQId can1_queue_handle;

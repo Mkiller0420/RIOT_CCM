@@ -119,10 +119,12 @@ int main(void)
 
 	/* USER CODE BEGIN SysInit */
 	MonitorInit();
-	osMonitorCreateTask(osPriorityNormal);
+
+	osMonitorCreateTask(MONI_PROI);
 	vMonitorSetLED(eAll, eOff);
-	osStateCreateTask(osPriorityHigh);
+	osStateCreateTask(STATE_PROI);
 	vStateSet(sWaitforCan3);
+	osCan1CreateTask(osPriorityAboveNormal, 0x12345678);
 	//osCan1CreateTask(osPriorityNormal);
 	//osCan2CreateTask(osPriorityNormal);
 

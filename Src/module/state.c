@@ -9,12 +9,12 @@
 #include "can_logic.h"
 #define statePERIOD 100
 //static TaskHandle_t sysmoni_task_handle = NULL;
+
 static osThreadId state_task_handle;
 static osMessageQDef(state_queue, 16, uint8_t);
 static osMessageQId state_queue_handle;
 
-static SyState systate_curr = sReset;
-static SyState systate_prev = sReset;
+static CCMConfig ccm;
 
 static void prvStateTask( void const * argument );
 
@@ -26,31 +26,31 @@ static void prvStateTask( void const * argument )
 		if (evt.status == osEventMessage) {
 			switch((uint8_t)evt.value.signals){
 			case sWaitforCan3:
-				if (systate_curr == sReset){
-					osCan3CreateTask(osPriorityNormal);
+				if (ccm.systate_curr == sReset){
+					osCan3CreateTask(CAN3_PROI);
 					vMonitorSetLED(eAll, eOff);
 					vMonitorSetLED(eWait, eBlink);
-					systate_prev = systate_curr;
-					systate_curr = evt.value.signals;
+					ccm.systate_prev = ccm.systate_curr;
+					ccm.systate_curr = evt.value.signals;
 				}else{
 
 					vStateSet(sError);
 				}
 				break;
 			case sWaitforPC:
-				if (systate_curr == sWaitforCan3){
+				if (ccm.systate_curr == sWaitforCan3){
 					vMonitorSetLED(eAll, eOff);
 					vMonitorSetLED(eRsvd, eBlink);
-
-					systate_prev = systate_curr;
-					systate_curr = evt.value.signals;
+					osCan1CreateTask(osPriorityAboveNormal, 0x12345678);
+					ccm.systate_prev = ccm.systate_curr;
+					ccm.systate_curr = evt.value.signals;
 				}
 				break;
 			case sError:
 				vMonitorSetLED(eAll, eOff);
 				vMonitorSetLED(eAlarm, eBlink);
-				systate_prev = systate_curr;
-				systate_curr = evt.value.signals;
+				ccm.systate_prev = ccm.systate_curr;
+				ccm.systate_curr = evt.value.signals;
 				break;
 			}
 		}
@@ -66,6 +66,9 @@ void osStateCreateTask( osPriority priority )
 
 static void prvStateNotifyTask( SyState st)
 {
+	if(st<0||st>sError){
+		st = sError;
+	}
 	osMessagePut(state_queue_handle, (uint8_t)st, 0);
 }
 
@@ -74,6 +77,6 @@ void vStateSet( SyState st )
 	prvStateNotifyTask(st);
 }
 
-SyState vStateGet(void){
-	return systate_curr;
+CCMConfig* vStateGet(void){
+	return &ccm;
 }

@@ -35,13 +35,18 @@ static osMessageQDef(can2_queue, 16, uint32_t);
 static osMessageQDef(can3_queue, 16, uint32_t);
 
 
+
+#define CAN3_ID				0x33333333
+#define	CAN3_CONFIG_HEAD1	0x11
+#define CAN3_CONFIG_HEAD2	0x22
+
 //Can1
 static void prvCan1Task( void const * argument )
 {
-	(void)argument;
+	//(void)argument;
 	MX_CAN1_Init();
 	Can1StaFlt = CanFilter_Init(&Can1Filter, &hcan1);
-	CAN_Init_App(&hcan1, 0x1111111);
+	CAN_Init_App(&hcan1, (uint32_t)argument);
 	HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0);
 
 	for(;;)
@@ -49,13 +54,19 @@ static void prvCan1Task( void const * argument )
 		//uint32_t can_tx = 0xABCDEF54;
 		//FillTxMsg(&hcan1, (uint8_t*)&can_tx, 4);
 		osEvent evt = osMessageGet(can1_queue_handle, osWaitForever);
+		if (evt.status == osEventMessage) {
+			if (vStateGet()->systate_curr == sWaitforPC){
+				if (hcan1.pRxMsg->ExtId){
+			}
+
+		}
 		//osDelay(1);
 	}
 }
-void osCan1CreateTask( osPriority priority )
+void osCan1CreateTask( osPriority priority , uint32_t can_id)
 {
 	osThreadDef(Can1Task, prvCan1Task, priority, 0, configMINIMAL_STACK_SIZE);
-	can1_start_handle = osThreadCreate(osThread(Can1Task), NULL);
+	can1_start_handle = osThreadCreate(osThread(Can1Task), (uint32_t*) can_id);
 	can1_queue_handle = osMessageCreate(osMessageQ(can1_queue), NULL);
 }
 
@@ -70,15 +81,17 @@ static void prvCan2Task( void const * argument )
 	for(;;)
 	{
 		osEvent evt = osMessageGet(can2_queue_handle, osWaitForever);
+		if (evt.status == osEventMessage) {
 
+		}
 	}
 
 }
 
-void osCan2CreateTask( osPriority priority )
+void osCan2CreateTask( osPriority priority , uint32_t can_id)
 {
 	osThreadDef(Can2Task, prvCan2Task, priority, 0, configMINIMAL_STACK_SIZE);
-	can2_start_handle = osThreadCreate(osThread(Can2Task), NULL);
+	can2_start_handle = osThreadCreate(osThread(Can2Task), &can_id);
 	can2_queue_handle = osMessageCreate(osMessageQ(can2_queue), NULL);
 }
 
@@ -94,8 +107,10 @@ static void prvCan3Task( void const * argument )
 	{
 		osEvent evt = osMessageGet(can3_queue_handle, osWaitForever);
 		if (evt.status == osEventMessage) {
-			if (vStateGet()==sWaitforCan3){
-				if (hcan3.pRxMsg->Data[0]==0x11){
+			if (vStateGet()->systate_curr==sWaitforCan3){
+				if (hcan3.pRxMsg->Data[0]==CAN3_CONFIG_HEAD1){
+					//osCan1CreateTask(osPriorityHigh, *(uint32_t*)&hcan3.pRxMsg->Data[1]);
+					osCan1CreateTask(CAN1_PROI, 0x11111111);
 					vStateSet(sWaitforPC);
 				}
 			}
@@ -109,4 +124,3 @@ void osCan3CreateTask( osPriority priority )
 	can3_start_handle = osThreadCreate(osThread(Can3Task), NULL);
 	can3_queue_handle = osMessageCreate(osMessageQ(can3_queue), NULL);
 }
-
