@@ -35,7 +35,7 @@ static osMessageQDef(can2_queue, 16, uint32_t);
 static osMessageQDef(can3_queue, 16, uint32_t);
 
 #define CAN3_ID				0x33333333
-#define	CAN3_CONFIG_HEAD1	0x11
+#define	CAN3_CONFIG_HEAD1	0x5010
 #define CAN3_CONFIG_HEAD2	0x22
 
 //Can1
@@ -53,16 +53,34 @@ static void prvCan1Task( void const * argument )
 		//FillTxMsg(&hcan1, (uint8_t*)&can_tx, 4);
 		osEvent evt = osMessageGet(can1_queue_handle, osWaitForever);
 		if (evt.status == osEventMessage) {
+			AnysCanId* id = (AnysCanId*)evt.value.signals;
+			switch(id->func_id){
+			case 0:
+				if (id->module_id==0){
+					if(id->module_type!=0
+							|| vStateGet()->systate_curr != sCCMWaitConfig
+							|| vStateGet()->ccm_is_configed){
+						//vStateSet(sError);
+					}else{
+						CCMConfigeration(id->coil_id, (const char*) &hcan1.pRxMsg->Data, hcan1.pRxMsg->DLC);
+					}
 
+				}
+				//CCMConfigeration(id->coil_id, (const char*) &hcan1.pRxMsg->Data, hcan1.pRxMsg->DLC);
+
+			}
+			//FillTxMsg(&hcan1, (uint8_t*)&evt.value.signals,4);
 		}
 		//osDelay(1);
 	}
 }
 void osCan1CreateTask( osPriority priority , uint32_t can_id)
 {
-	osThreadDef(Can1Task, prvCan1Task, priority, 0, configMINIMAL_STACK_SIZE);
-	can1_start_handle = osThreadCreate(osThread(Can1Task), (uint32_t*) can_id);
-	can1_queue_handle = osMessageCreate(osMessageQ(can1_queue), NULL);
+	if (can1_start_handle==NULL && can1_queue_handle==NULL){
+		osThreadDef(Can1Task, prvCan1Task, priority, 0, configMINIMAL_STACK_SIZE);
+		can1_start_handle = osThreadCreate(osThread(Can1Task), (uint32_t*) can_id);
+		can1_queue_handle = osMessageCreate(osMessageQ(can1_queue), NULL);
+	}
 }
 
 //Can2
@@ -102,11 +120,13 @@ static void prvCan3Task( void const * argument )
 	{
 		osEvent evt = osMessageGet(can3_queue_handle, osWaitForever);
 		if (evt.status == osEventMessage) {
-			if (vStateGet()->systate_curr==sWaitforCan3){
-				if (hcan3.pRxMsg->Data[0]==CAN3_CONFIG_HEAD1){
+			if (vStateGet()->systate_curr==sCan3WaitConfig){
+				if ((hcan3.pRxMsg->Data[0]<<8)
+						+hcan3.pRxMsg->Data[1]==CAN3_CONFIG_HEAD1){
+
 					//osCan1CreateTask(osPriorityHigh, *(uint32_t*)&hcan3.pRxMsg->Data[1]);
-					osCan1CreateTask(CAN1_PROI, 0x11111111);
-					vStateSet(sWaitforPC);
+					//osCan1CreateTask(CAN1_PROI, 0x12345678);
+					vStateSet(sCCMWaitConfig);
 				}
 			}
 		}

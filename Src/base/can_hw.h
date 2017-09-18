@@ -16,20 +16,20 @@ CAN_HandleTypeDef hcan3;
 /*************** CAN ***************/
 //Protocol of CAN1
 //for 29bit CANID, mask and location
-#define FRAME_ID_MASK		0x18000000
-#define FRAME_ID_LOC		27
-#define STACK_ID_MASK		0x07F00000
-#define	STACK_ID_LOC		20
+#define FRAM_ID_MASK		0x18000000
+#define FRAM_ID_LOCA		27
+#define STAK_ID_MASK		0x07F00000
+#define	STAK_ID_LOCA		20
 #define FUNC_ID_MASK		0x000F0000
-#define FUNC_ID_LOC			16
-#define	MODULE_ID_MASK		0x0000F000
-#define	MODULE_ID_LOC		12
-#define MODULE_TYPE_MASK	0x00000F00
-#define MODULE_TYPE_LOC		8
-#define CHANNEL_ID_MASK		0x000000F0
-#define CHANNEL_ID_LOC		4
+#define FUNC_ID_LOCA		16
+#define	MODL_ID_MASK		0x0000F000
+#define	MODL_ID_LOCA		12
+#define MODL_TY_MASK		0x00000F00
+#define MODL_TY_LOCA		8
+#define CHAN_ID_MASK		0x000000F0
+#define CHAN_ID_LOCA		4
 #define COIL_ID_MASK		0x0000000F
-#define	COIL_ID_LOC			0
+#define	COIL_ID_LOCA		0
 
 typedef struct{
 	uint8_t 	frame_id;

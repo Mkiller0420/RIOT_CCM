@@ -21,15 +21,45 @@ uint32_t Can2TxCntr = 0;
 uint32_t Can3RxCntr = 0;
 uint32_t Can3TxCntr = 0;
 
-static CanTxMsgTypeDef Can1TxMsg;
-static CanRxMsgTypeDef Can1RxMsg;
+static CanTxMsgTypeDef 	Can1TxMsg;
+static CanRxMsgTypeDef 	Can1RxMsg;
 
-static CanTxMsgTypeDef Can2TxMsg;
-static CanRxMsgTypeDef Can2RxMsg;
+static CanTxMsgTypeDef 	Can2TxMsg;
+static CanRxMsgTypeDef 	Can2RxMsg;
 
-static CanTxMsgTypeDef Can3TxMsg;
-static CanRxMsgTypeDef Can3RxMsg;
+static CanTxMsgTypeDef	Can3TxMsg;
+static CanRxMsgTypeDef 	Can3RxMsg;
+
+static AnysCanId		Can1RxCanId;
+static AnysCanId		Can2RxCanId;
+
+static AnysCanId		Can1TxCanId;
+static AnysCanId		Can2TxCanId;
+
 HAL_StatusTypeDef CanxStaTx = HAL_ERROR;
+static AnysCanId CAN_ID_Analyze(uint32_t can_id){
+	AnysCanId analyzed_can_id;
+	analyzed_can_id.frame_id 	= (can_id & FRAM_ID_MASK)>>FRAM_ID_LOCA;
+	analyzed_can_id.stack_id 	= (can_id & STAK_ID_MASK)>>STAK_ID_LOCA;
+	analyzed_can_id.func_id  	= (can_id & FUNC_ID_MASK)>>FUNC_ID_LOCA;
+	analyzed_can_id.module_id 	= (can_id & MODL_ID_MASK)>>MODL_ID_LOCA;
+	analyzed_can_id.module_type = (can_id & MODL_TY_MASK)>>MODL_TY_LOCA;
+	analyzed_can_id.channel_id 	= (can_id & CHAN_ID_MASK)>>CHAN_ID_LOCA;
+	analyzed_can_id.coil_id 	= (can_id & COIL_ID_MASK)>>COIL_ID_LOCA;
+	return analyzed_can_id;
+}
+
+static uint32_t CAN_ID_Combin(AnysCanId* id){
+	uint32_t can_id;
+	can_id = (((id->frame_id)	<<FRAM_ID_LOCA) & FRAM_ID_MASK)
+			+(((id->stack_id)	<<STAK_ID_LOCA) & STAK_ID_MASK)
+			+(((id->func_id)		<<FUNC_ID_LOCA) & FUNC_ID_MASK)
+			+(((id->module_id)	<<MODL_ID_LOCA) & MODL_ID_MASK)
+			+(((id->module_type)	<<MODL_TY_LOCA) & MODL_TY_MASK)
+			+(((id->channel_id)	<<CHAN_ID_LOCA) & CHAN_ID_MASK)
+			+(((id->coil_id)		<<COIL_ID_LOCA) & COIL_ID_MASK);
+	return can_id;
+}
 
 void CAN_Init_App(CAN_HandleTypeDef* hcan, uint32_t ExtId)
 {
@@ -97,12 +127,14 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 	case (uint32_t)CAN1:
 			Can1RxCntr++;
 	FillTxMsg(hcan, (uint8_t*)&Can1RxCntr,4);
-	Can1TxCntr++;
+	Can1RxCanId = CAN_ID_Analyze(hcan->pRxMsg->ExtId);
+	osMessagePut(can1_queue_handle, (uint32_t)&Can1RxCanId, 0);
 	break;
 	case (uint32_t)CAN2:
 			Can2RxCntr++;
 	FillTxMsg(hcan, (uint8_t*)&Can2RxCntr,4);
-	Can2TxCntr++;
+	Can2RxCanId = CAN_ID_Analyze(hcan->pRxMsg->ExtId);
+	osMessagePut(can2_queue_handle, (uint32_t)&Can2RxCanId, 0);
 	break;
 	case (uint32_t)CAN3:
 			Can3RxCntr++;
@@ -189,3 +221,4 @@ void MX_CAN3_Init(void)
 	}
 
 }
+
